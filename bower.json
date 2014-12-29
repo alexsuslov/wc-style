@@ -1,0 +1,15 @@
+{
+  "name": "wc-style",
+  "version": "0.0.0",
+  "authors": [
+    "alex suslov <suslov@me.com>"
+  ],
+  "description": "convert json css to <style>",
+  "main": "/js/wc-style.js",
+  "keywords": [
+    "dom",
+    "css",
+    "style"
+  ],
+  "license": "MIT"
+}
