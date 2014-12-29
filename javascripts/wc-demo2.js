@@ -138,7 +138,6 @@
           _this.$el.css('z-index', 10000);
           _this.cursor = [e.pageX, e.pageY];
           _this.size = _this.data.size;
-          console.log(_this.el);
           _this.offset = [e.pageX - _this.el.offsetLeft, e.pageY - _this.el.offsetTop];
           $(window).on('mousemove', $.proxy(self.mouseMove, self));
           return _this.state = (e.offsetY < _this.moveZone ? 'move' : e.offsetX < _this.resizeZone ? 'leftResize' : self.data.size[0] - e.offsetX < _this.resizeZone ? 'rightResize' : self.data.size[1] - e.offsetY < _this.resizeZone ? 'bottomResize' : false);
