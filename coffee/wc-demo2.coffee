@@ -1,117 +1,141 @@
-$ ->
-	window.WC.style.val ".window", "{
-				position: absolute;
-				-khtml-border-radius: 6px;
-				border-radius: 6px;
-				padding: 16px;
-				background-color: #eaeaea; }"
+WC = window.WC
+class Wnd
+	data:{}
+	resizeZone: 16
+	moveZone: 36
 
-	window.WC.style.val ".window .window-title","{
-				background-color: blue;
-				color: white;
-				padding: 8px;
-				-khtml-border-radius: 6px;
-				border-radius: 6px;
-				margin-bottom: 16px; }"
+	genId:()->
+		Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
 
-	window.WC.style.val ".windowMove", "{
-				border: 1px solid #bfbfbf;
-				-webkit-box-shadow: 0 0 8px #bfbfbf; }"
-
-	wcResize = ->
-		h = window.innerHeight
-		w = window.innerWidth
-		f = 16
-
-		class Size
-			f:16
-			h: window.innerHeight
-			w: window.innerWidth
-
-			constructor:(@data)->
-				@Place = @data.place if @data?.place
-				@Size = @data.size if @data?.size
-				@f = @data.f if @data?.f
-				@
+	constructor:(@opt, @el)->
+		@$el = $ el if @el
+		@id = @$el.attr 'id'
+		@parseCss @opt.style.val "##{@id}"
+		# console.log @data
+		@$body = @$el.find '.window-body'
+		@events()
+		@
 
 
-			feed:()->
-				[
-					@Place[0] + @Size[0]
-					@Place[1] + @Size[1]
-				]
+	parseCss:(str)->
+		size = [0,0]
+		place = [0,0]
+		str.replace( /^\{/, '').replace( /\}$/, '').split(';').forEach (value)=>
+			value = value.split(':')
+			name = $.trim value[0]
+			val = $.trim value[1]
+			size[0] = parseInt val if name is 'width'
+			size[1] = parseInt val if name is 'height'
+			place[0] = parseInt val if name is 'left'
+			place[1] = parseInt val if name is 'top'
+			@data[name] = val if name
+		@data.size = size
+		@data.place = place
+		@
 
 
-			place:()->
-				[
-					@Place[0] + @f
-					@Place[1] + @f
-				]
+	updateStyle:()->
+		css = {}
+		for name of @data
+			switch name
+				when 'place'
+					css.left = @data.place[0] + 'px'
+					css.top = @data.place[1] + 'px'
+				when 'size'
+					css.width = @data.size[0] + 'px'
+					css.height = @data.size[1] + 'px'
+				else
+					css[name] = @data[name]
+		@opt.style.val '#' + @id, css
+		@
 
-
-			size : ()->
-		    [
-		    	@Size[0] - (3 * @f)
-		    	@Size[1] - (3 * @f)
-		    ]
-
-
-		if w < 768
-			console.log w
-			podbor = new Size
-			  place: [0,0]
-			  size : [ w , h * .8 ]
-
-			curs = new Size
-			  place: [0, podbor.feed()[1]]
-			  size : [ w , h * .8 ]
-
-			calc = new Size
-			  place: [0, curs.feed()[1]]
-			  size : [ w , h * .8 ]
-
+	val:(name, val)->
+		if val
+			 @data[name] = val
+			 @updateStyle()
 		else
+			@data[name]
 
-			podbor = new Size
-			  place: [0,0]
-			  size : [( w * .3) , (h * .6) ]
+	mouseMove:(e)->
+		switch @state
+			when 'bottomResize'
+				@val 'size', [@size[0], @size[1] + (e.pageY - @cursor[1]) ]
+				@onResize()
 
-			curs = new Size
-			  place: [( w * .3) ,0]
-			  size : [( w * .7) - f , (h * .6) ]
+			when 'rightResize'
+				@val 'size', [@size[0] + (e.pageX - @cursor[0]), @size[1] ]
+				@onResize()
 
-			calc = new Size
-			  place: [ 0  , podbor.feed()[1]]
-			  size : [ w - f  , (h * .4) - 2 * f ]
+			when 'leftResize'
+				@val 'size', [
+					@size[0] - (e.pageX -  @cursor[0])
+					@size[1]
+				]
+				# place
+				place  = @val 'place'
+				place[0] = ( e.pageX -  @offset[0])
+				@val 'place', place
+				@onResize()
 
-		window.WC.style.val
-			'#podbor':"{
-					position: absolute;
-					left:#{podbor.place()[0]}px;
-					top:#{podbor.place()[1]}px;
-					width:#{podbor.size()[0]}px;
-					height:#{podbor.size()[1]}px;}
-					"
-			'#podbor iframe':"{
-					height:#{podbor.size()[1] - 36 - 16}px;}
-					"
+			when 'move'
+				@val 'place', [e.pageX - @offset[0], e.pageY - @offset[1]]
+		@
 
-			'#curs':"{
-					position: absolute;
-					left:#{curs.place()[0]}px;
-					top:#{curs.place()[1]}px;
-					width:#{curs.size()[0]}px;
-					height:#{curs.size()[1]}px;}
-					"
+	events:->
+		self = @
+		state = @state
+		clean = (e)->
+			$(window).off 'mousemove'
+			self.opt.style.enableSelection()
+			self.state = false
+			self.$el.removeClass 'windowMove'
+			self.$body.show()
+			self.$el.css 'z-index', self.z
 
-			'#calc':"{
-					position: absolute;
-					left:#{calc.place()[0]}px;
-					top:#{calc.place()[1]}px;
-					width:#{calc.size()[0]}px;
-					height:#{calc.size()[1]}px;}
-					"
-	wcResize()
+		@$el.on 'mouseup', clean
+		# @$el.on 'mouseleave', clean
 
-	$(window).resize ->
-		setTimeout wcResize, 400
+		@$el.on 'mousedown', (e)=>
+
+			@opt.style.disableSelection()
+			@$body.hide()
+			@$el.addClass 'windowMove'
+			@z = @$el.css 'z-index'
+			@$el.css 'z-index', 10000
+
+			@cursor = [e.pageX, e.pageY]
+			@data.place = [@el.offsetLeft, @el.offsetTop]
+			@size = @data.size
+			@offset = [e.pageX - @el.offsetLeft, e.pageY - @el.offsetTop]
+
+			$(window).on 'mousemove', $.proxy self.mouseMove, self
+
+			@state = (
+				if e.offsetY < @moveZone
+					'move'
+				else if e.offsetX < @resizeZone
+					'leftResize'
+				else if self.data.size[0] - e.offsetX < @resizeZone
+					'rightResize'
+				else if self.data.size[1] - e.offsetY < @resizeZone
+					'bottomResize'
+				else
+					false
+					)
+		@
+	onResize:()->
+
+$ ->
+	WC.style.val
+		'.windowMove':'{border: 1px solid #bfbfbf;
+		-webkit-box-shadow: 0 0 8px #bfbfbf; }'
+
+
+	$.fn.wnd = (options)->
+		options = options || {}
+		@.each ( i, el)->
+			options.style = WC.style
+			new Wnd( options, el)
+
+	$('#podbor').wnd()
+
