@@ -5,8 +5,6 @@
   WC = window.WC;
 
   Wnd = (function() {
-    Wnd.prototype.data = {};
-
     Wnd.prototype.resizeZone = 16;
 
     Wnd.prototype.moveZone = 36;
@@ -25,11 +23,15 @@
       this.parseCss(this.opt.style.val("#" + this.id));
       this.$body = this.$el.find('.window-body');
       this.events();
+      window[this.id] = this;
       this;
     }
 
     Wnd.prototype.parseCss = function(str) {
       var place, size;
+      if (!this.data) {
+        this.data = {};
+      }
       size = [0, 0];
       place = [0, 0];
       str.replace(/^\{/, '').replace(/\}$/, '').split(';').forEach((function(_this) {
@@ -135,8 +137,8 @@
           _this.z = _this.$el.css('z-index');
           _this.$el.css('z-index', 10000);
           _this.cursor = [e.pageX, e.pageY];
-          _this.data.place = [_this.el.offsetLeft, _this.el.offsetTop];
           _this.size = _this.data.size;
+          console.log(_this.el);
           _this.offset = [e.pageX - _this.el.offsetLeft, e.pageY - _this.el.offsetTop];
           $(window).on('mousemove', $.proxy(self.mouseMove, self));
           return _this.state = (e.offsetY < _this.moveZone ? 'move' : e.offsetX < _this.resizeZone ? 'leftResize' : self.data.size[0] - e.offsetX < _this.resizeZone ? 'rightResize' : self.data.size[1] - e.offsetY < _this.resizeZone ? 'bottomResize' : false);
@@ -162,7 +164,9 @@
         return new Wnd(options, el);
       });
     };
-    return $('#podbor').wnd();
+    $('#podbor').wnd();
+    $('#curs').wnd();
+    return $('#calc').wnd();
   });
 
 }).call(this);
