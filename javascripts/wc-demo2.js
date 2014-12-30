@@ -21,6 +21,9 @@
       }
       this.id = this.$el.attr('id');
       this.parseCss(this.opt.style.val("#" + this.id));
+      this.$title = this.$el.find('.window-title');
+      this.name = this.$title.text();
+      this.$title.append("<span>X</span>");
       this.$body = this.$el.find('.window-body');
       this.events();
       window[this.id] = this;
@@ -128,6 +131,9 @@
         self.$body.show();
         return self.$el.css('z-index', self.z);
       };
+      this.$el.find('.window-title span').on('click', function(e) {
+        return self.$el.hide();
+      });
       this.$el.on('mouseup', clean);
       this.$el.on('mousedown', (function(_this) {
         return function(e) {
@@ -153,19 +159,15 @@
   })();
 
   $(function() {
-    WC.style.val({
-      '.windowMove': '{border: 1px solid #bfbfbf; -webkit-box-shadow: 0 0 8px #bfbfbf; }'
-    });
     $.fn.wnd = function(options) {
       options = options || {};
       return this.each(function(i, el) {
         options.style = WC.style;
-        return new Wnd(options, el);
+        return window.WC.taskbar.add(new Wnd(options, el));
       });
     };
-    $('#podbor').wnd();
-    $('#curs').wnd();
-    return $('#calc').wnd();
+    $('#taskbar').taskbar();
+    return $('.wc-window').wnd();
   });
 
 }).call(this);
