@@ -3,18 +3,20 @@
   $(function() {
     var wcResize;
     window.WC.style.val({
-      ".window": "{ position: absolute; -khtml-border-radius: 6px; border-radius: 6px; padding: 16px; background-color: #eaeaea; }",
-      ".window .window-title": "{ background-color: #327cb0; color: white; padding: 8px; -khtml-border-radius: 6px; border-radius: 6px; margin-bottom: 16px; }"
+      ".wc-window": "{ position: absolute; # -khtml-border-radius: 6px; # border-radius: 6px; border: 2px outset #d0d0d0; padding: 16px; background-color: #eaeaea; }",
+      ".wc-window .window-title": "{ background-color: #327cb0; color: white; padding: 8px; -khtml-border-radius: 6px; border-radius: 6px; margin-bottom: 16px; }",
+      ".wc-window .window-title span": "{ background-color: #cd573a; padding: 4px 8px ; -khtml-border-radius: 8px; border-radius: 16px; font-size: 14px; float: right; margin-top: -4px; }",
+      '.windowMove': '{ border: 2px outset #d0d0d0; -webkit-box-shadow: 0 0 8px #bfbfbf; }'
     });
     wcResize = function() {
       var Size, calc, curs, f, h, podbor, w;
-      h = window.innerHeight;
+      h = window.innerHeight - 64;
       w = window.innerWidth;
       f = 16;
       Size = (function() {
         Size.prototype.f = 16;
 
-        Size.prototype.h = window.innerHeight;
+        Size.prototype.h = h;
 
         Size.prototype.w = window.innerWidth;
 

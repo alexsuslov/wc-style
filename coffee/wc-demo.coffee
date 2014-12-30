@@ -1,28 +1,44 @@
 $ ->
 	window.WC.style.val
-		".window": "{
-				position: absolute;
-				-khtml-border-radius: 6px;
-				border-radius: 6px;
-				padding: 16px;
-				background-color: #eaeaea; }"
+		".wc-window": "{
+			position: absolute;
+			# -khtml-border-radius: 6px;
+			# border-radius: 6px;
+			border: 2px outset #d0d0d0;
+			padding: 16px;
+			background-color: #eaeaea; }"
 
-		".window .window-title":"{
-				background-color: #327cb0;
-				color: white;
-				padding: 8px;
-				-khtml-border-radius: 6px;
-				border-radius: 6px;
-				margin-bottom: 16px; }"
+		".wc-window .window-title":"{
+			background-color: #327cb0;
+			color: white;
+			padding: 8px;
+			-khtml-border-radius: 6px;
+			border-radius: 6px;
+			margin-bottom: 16px; }"
+
+		".wc-window .window-title span":"{
+			background-color: #cd573a;
+			padding: 4px 8px ;
+			-khtml-border-radius: 8px;
+			border-radius: 16px;
+			font-size: 14px;
+			float: right;
+			margin-top: -4px;
+
+			}"
+
+		'.windowMove':'{
+			border: 2px outset #d0d0d0;
+		  -webkit-box-shadow: 0 0 8px #bfbfbf; }'
 
 	wcResize = ->
-		h = window.innerHeight
+		h = window.innerHeight - 64
 		w = window.innerWidth
 		f = 16
 
 		class Size
-			f:16
-			h: window.innerHeight
+			f: 16
+			h: h
 			w: window.innerWidth
 
 			constructor:(@data)->

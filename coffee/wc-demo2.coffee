@@ -1,6 +1,6 @@
 WC = window.WC
+
 class Wnd
-	data:{}
 	resizeZone: 16
 	moveZone: 36
 
@@ -8,16 +8,22 @@ class Wnd
 		Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
 
 	constructor:(@opt, @el)->
+
 		@$el = $ el if @el
 		@id = @$el.attr 'id'
 		@parseCss @opt.style.val "##{@id}"
-		# console.log @data
+		@$title = @$el.find '.window-title'
+		@name = @$title.text()
+		@$title.append "<span>X</span>"
 		@$body = @$el.find '.window-body'
 		@events()
+		# for debug
+		window[@id] = @
 		@
 
 
 	parseCss:(str)->
+		@data = {} unless @data
 		size = [0,0]
 		place = [0,0]
 		str.replace( /^\{/, '').replace( /\}$/, '').split(';').forEach (value)=>
@@ -91,20 +97,24 @@ class Wnd
 			self.$el.removeClass 'windowMove'
 			self.$body.show()
 			self.$el.css 'z-index', self.z
+		@$el.find( '.window-title span').on 'click', (e)->
+			self.$el.hide()
 
 		@$el.on 'mouseup', clean
 		# @$el.on 'mouseleave', clean
 
 		@$el.on 'mousedown', (e)=>
-
+			# отключаю выделение текста и прячу контент для скорости
 			@opt.style.disableSelection()
 			@$body.hide()
+			# Добавляю класс выделения
 			@$el.addClass 'windowMove'
+			# сохраняю z-index и поднимаю блок вверх
 			@z = @$el.css 'z-index'
 			@$el.css 'z-index', 10000
 
+			# сохраняю курсор
 			@cursor = [e.pageX, e.pageY]
-			@data.place = [@el.offsetLeft, @el.offsetTop]
 			@size = @data.size
 			@offset = [e.pageX - @el.offsetLeft, e.pageY - @el.offsetTop]
 
@@ -126,16 +136,12 @@ class Wnd
 	onResize:()->
 
 $ ->
-	WC.style.val
-		'.windowMove':'{border: 1px solid #bfbfbf;
-		-webkit-box-shadow: 0 0 8px #bfbfbf; }'
-
-
 	$.fn.wnd = (options)->
 		options = options || {}
 		@.each ( i, el)->
 			options.style = WC.style
-			new Wnd( options, el)
+			window.WC.taskbar.add new Wnd( options, el)
 
-	$('#podbor').wnd()
+	$('#taskbar').taskbar()
+	$('.wc-window').wnd()
 

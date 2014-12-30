@@ -5,8 +5,6 @@
   WC = window.WC;
 
   Wnd = (function() {
-    Wnd.prototype.data = {};
-
     Wnd.prototype.resizeZone = 16;
 
     Wnd.prototype.moveZone = 36;
@@ -23,13 +21,20 @@
       }
       this.id = this.$el.attr('id');
       this.parseCss(this.opt.style.val("#" + this.id));
+      this.$title = this.$el.find('.window-title');
+      this.name = this.$title.text();
+      this.$title.append("<span>X</span>");
       this.$body = this.$el.find('.window-body');
       this.events();
+      window[this.id] = this;
       this;
     }
 
     Wnd.prototype.parseCss = function(str) {
       var place, size;
+      if (!this.data) {
+        this.data = {};
+      }
       size = [0, 0];
       place = [0, 0];
       str.replace(/^\{/, '').replace(/\}$/, '').split(';').forEach((function(_this) {
@@ -126,6 +131,9 @@
         self.$body.show();
         return self.$el.css('z-index', self.z);
       };
+      this.$el.find('.window-title span').on('click', function(e) {
+        return self.$el.hide();
+      });
       this.$el.on('mouseup', clean);
       this.$el.on('mousedown', (function(_this) {
         return function(e) {
@@ -135,7 +143,6 @@
           _this.z = _this.$el.css('z-index');
           _this.$el.css('z-index', 10000);
           _this.cursor = [e.pageX, e.pageY];
-          _this.data.place = [_this.el.offsetLeft, _this.el.offsetTop];
           _this.size = _this.data.size;
           _this.offset = [e.pageX - _this.el.offsetLeft, e.pageY - _this.el.offsetTop];
           $(window).on('mousemove', $.proxy(self.mouseMove, self));
@@ -152,17 +159,15 @@
   })();
 
   $(function() {
-    WC.style.val({
-      '.windowMove': '{border: 1px solid #bfbfbf; -webkit-box-shadow: 0 0 8px #bfbfbf; }'
-    });
     $.fn.wnd = function(options) {
       options = options || {};
       return this.each(function(i, el) {
         options.style = WC.style;
-        return new Wnd(options, el);
+        return window.WC.taskbar.add(new Wnd(options, el));
       });
     };
-    return $('#podbor').wnd();
+    $('#taskbar').taskbar();
+    return $('.wc-window').wnd();
   });
 
 }).call(this);
